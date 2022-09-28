@@ -9,9 +9,9 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.specs import array_spec
 from tf_agents.trajectories import time_step as ts
 
-TRAIN_CUT_PERCENT = 0.8
-VAL_CUT_PERCENT = 0.1
-TEST_CUT_PERCENT = 0.1
+TRAIN_CUT_PERCENT = 0.7
+VAL_CUT_PERCENT = 0.15
+TEST_CUT_PERCENT = 0.15
 
 CFTC_NO_USE_COLUMNS = [
     'Market_and_Exchange_Names',

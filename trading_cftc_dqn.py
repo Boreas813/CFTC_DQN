@@ -27,7 +27,7 @@ print(tf.version.VERSION)
 
 symbol = 'EURUSD'
 
-num_iterations = 100000  # @param {type:"integer"}
+num_iterations = 1000000  # @param {type:"integer"}
 initial_collect_steps = 100  # @param {type:"integer"}
 collect_steps_per_iteration = 1  # @param {type:"integer"}
 replay_buffer_max_length = 24  # @param {type:"integer"}

@@ -27,10 +27,10 @@ print(tf.version.VERSION)
 
 symbol = 'EURUSD'
 
-num_iterations = 1000000  # @param {type:"integer"}
+num_iterations = 300000  # @param {type:"integer"}
 initial_collect_steps = 100  # @param {type:"integer"}
 collect_steps_per_iteration = 1  # @param {type:"integer"}
-replay_buffer_max_length = 24  # @param {type:"integer"}
+replay_buffer_max_length = 32  # @param {type:"integer"}
 batch_size = 32  # @param {type:"integer"}
 learning_rate = 1e-3 # @param {type:"number"}
 log_interval = 200  # @param {type:"integer"}
@@ -48,13 +48,11 @@ print(env.action_spec())
 time_step = env.reset()
 print('Time step:')
 print(time_step)
-
 action = np.array(1, dtype=np.int32)
-
 next_time_step = env.step(action)
 print('Next time step:')
 print(next_time_step)
-
+#
 train_py_env = TradingEnv(symbol, ob_shape=24, hold_week=2, review_week=3)
 eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=24, hold_week=2, review_week=3, start_time=None, end_time=None)
 test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=24, hold_week=2, review_week=3, start_time=None, end_time=None)
@@ -180,8 +178,12 @@ agent.train = common.function(agent.train)
 agent.train_step_counter.assign(0)
 
 # Evaluate the agent's policy once before training.
-avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
-returns = [avg_return]
+eval_avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
+eval_returns = [eval_avg_return]
+
+test_avg_return = compute_avg_return(test_env, agent.policy, num_eval_episodes)
+test_returns = [test_avg_return]
+
 
 # Reset the environment.
 time_step = train_py_env.reset()
@@ -209,14 +211,16 @@ for _ in range(num_iterations):
     print('step = {0}: loss = {1}'.format(step, train_loss))
 
   if step % eval_interval == 0:
-    avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
-    print('step = {0}: Eval Average Return = {1}'.format(step, avg_return))
+    avg_return_eval = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
+    print('step = {0}: Eval Average Return = {1}'.format(step, avg_return_eval))
+    eval_returns.append(avg_return_eval)
     avg_return_test = compute_avg_return(test_env, agent.policy, num_eval_episodes)
     print('step = {0}: Test Average Return = {1}'.format(step, avg_return_test))
-    returns.append(avg_return)
+    test_returns.append(avg_return_test)
 
 iterations = range(0, num_iterations + 1, eval_interval)
-plt.plot(iterations, returns)
+plt.plot(iterations, eval_returns)
+plt.plot(iterations, test_returns, color='#054E9F')
 plt.ylabel('Average Return')
 plt.xlabel('Iterations')
 plt.ylim(top=50000)

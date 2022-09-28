@@ -23,12 +23,14 @@ from tf_agents.utils import common
 
 from cftc_env import TradingEnv, TradingEnvVal
 
+print(tf.version.VERSION)
+
 symbol = 'EURUSD'
 
 num_iterations = 100000  # @param {type:"integer"}
 initial_collect_steps = 100  # @param {type:"integer"}
 collect_steps_per_iteration = 1  # @param {type:"integer"}
-replay_buffer_max_length = 100000  # @param {type:"integer"}
+replay_buffer_max_length = 32  # @param {type:"integer"}
 batch_size = 32  # @param {type:"integer"}
 learning_rate = 1e-3 # @param {type:"number"}
 log_interval = 200  # @param {type:"integer"}
@@ -36,23 +38,22 @@ num_eval_episodes = 1  # @param {type:"integer"}
 eval_interval = 1000  # @param {type:"integer"}
 
 # for test
-# env = TradingEnv(symbol=symbol, ob_shape=24, hold_week=2, review_week=3)
-# time_step = env.reset()
-# print('Observation Spec:')
-# print(env.time_step_spec().observation)
-# print('Reward Spec:')
-# print(env.time_step_spec().reward)
-# print('Action Spec:')
-# print(env.action_spec())
-#
-# print('Time step:')
-# print(time_step)
-#
-# action = np.array(1, dtype=np.int32)
-#
-# next_time_step = env.step(action)
-# print('Next time step:')
-# print(next_time_step)
+env = TradingEnv(symbol=symbol, ob_shape=24, hold_week=2, review_week=3)
+print('Observation Spec:')
+print(env.time_step_spec().observation)
+print('Reward Spec:')
+print(env.time_step_spec().reward)
+print('Action Spec:')
+print(env.action_spec())
+time_step = env.reset()
+print('Time step:')
+print(time_step)
+
+action = np.array(1, dtype=np.int32)
+
+next_time_step = env.step(action)
+print('Next time step:')
+print(next_time_step)
 
 train_py_env = TradingEnv(symbol, ob_shape=24, hold_week=2, review_week=3)
 eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=24, hold_week=2, review_week=3, start_time=None, end_time=None)
@@ -100,8 +101,6 @@ agent = dqn_agent.DqnAgent(
 
 agent.initialize()
 
-
-
 eval_policy = agent.policy
 collect_policy = agent.collect_policy
 
@@ -126,6 +125,8 @@ def compute_avg_return(environment, policy, num_episodes=10):
   avg_return = total_return / num_episodes
   return avg_return.numpy()[0]
 
+random_result = compute_avg_return(eval_env, random_policy, num_eval_episodes)
+print('random result:', random_result)
 
 table_name = 'uniform_table'
 replay_buffer_signature = tensor_spec.from_spec(
@@ -154,6 +155,15 @@ rb_observer = reverb_utils.ReverbAddTrajectoryObserver(
   table_name,
   sequence_length=2)
 
+print(agent.collect_data_spec)
+print(agent.collect_data_spec._fields)
+
+py_driver.PyDriver(
+    env,
+    py_tf_eager_policy.PyTFEagerPolicy(
+      random_policy, use_tf_function=True),
+    [rb_observer],
+    max_steps=initial_collect_steps).run(train_py_env.reset())
 
 dataset = replay_buffer.as_dataset(
     num_parallel_calls=3,
@@ -177,7 +187,7 @@ time_step = train_py_env.reset()
 
 # Create a driver to collect experience.
 collect_driver = py_driver.PyDriver(
-    train_env,
+    env,
     py_tf_eager_policy.PyTFEagerPolicy(
       agent.collect_policy, use_tf_function=True),
     [rb_observer],

@@ -1,0 +1,2 @@
+tf-agents[reverb]  # linux only, not support windows
+pandas

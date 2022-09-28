@@ -1,11 +1,6 @@
-import base64
-import imageio
-import IPython
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL.Image
-import pyvirtualdisplay
 import reverb
 
 import tensorflow as tf

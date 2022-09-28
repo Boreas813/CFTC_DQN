@@ -559,7 +559,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'training_data/CFTC_{self.symbol}csv')
+        train_data = pd.read_csv(f'training_data/CFTC_{self.symbol}.csv')
         # 回测开发阶段
         if self.mode == 'dev':
             train_len = len(train_data)

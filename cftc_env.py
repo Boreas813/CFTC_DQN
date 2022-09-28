@@ -470,21 +470,6 @@ class TradingEnvVal(py_environment.PyEnvironment):
 
         train_data = (train_data - train_mean) / train_std
 
-        # 调整数据排列顺序
-        # if self.version == '1.0':
-        #     if self.symbol in ['EURUSD']:
-        #         order = ['funs_long', 'funs_short', 'com_long', 'com_short']
-        #     elif self.symbol in ['GBPUSD', 'GOLD']:
-        #         order = ['funs_long', 'funs_short', 'com_long', 'com_short', 'funds_hold']
-        #     else:
-        #         order = ['funds_hold_long','funds_hold_short','funds_hold_spread','coms_hold_long','coms_hold_short','all_hold_long','all_hold_short','non_report_long','non_report_short','funds_change_long','funds_change_short','funds_change_spread','coms_change_long','coms_change_short','all_change_long','all_change_short','non_report_change_long','non_report_change_short']
-        # else:
-        #     order = ['funds_hold_long', 'funds_hold_short', 'funds_hold_spread', 'coms_hold_long', 'coms_hold_short',
-        #              'all_hold_long', 'all_hold_short', 'non_report_long', 'non_report_short', 'funds_change_long',
-        #              'funds_change_short', 'funds_change_spread', 'coms_change_long', 'coms_change_short',
-        #              'all_change_long', 'all_change_short', 'non_report_change_long', 'non_report_change_short']
-
-        # train_data = train_data[order]
 
         train_data_array = train_data.values
         price_data = pd.read_csv(f'training_data/{self.symbol}10080.csv')

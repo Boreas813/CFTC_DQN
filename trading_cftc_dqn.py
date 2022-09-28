@@ -21,7 +21,7 @@ from tf_agents.specs import tensor_spec
 from tf_agents.utils import common
 
 
-from cftc_env import TradingEnv, TradingEnvVal
+from cftc_env import TradingEnv, TradingEnvVal, TradingEnvTest
 
 print(tf.version.VERSION)
 
@@ -57,9 +57,10 @@ print(next_time_step)
 
 train_py_env = TradingEnv(symbol, ob_shape=24, hold_week=2, review_week=3)
 eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=24, hold_week=2, review_week=3, start_time=None, end_time=None)
+test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=24, hold_week=2, review_week=3, start_time=None, end_time=None)
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-
+test_env = tf_py_environment.TFPyEnvironment(test_py_env)
 
 fc_layer_params = (100, 50)
 action_tensor_spec = tensor_spec.from_spec(train_py_env.action_spec())
@@ -209,7 +210,9 @@ for _ in range(num_iterations):
 
   if step % eval_interval == 0:
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
-    print('step = {0}: Average Return = {1}'.format(step, avg_return))
+    print('step = {0}: Eval Average Return = {1}'.format(step, avg_return))
+    avg_return_test = compute_avg_return(test_env, agent.policy, num_eval_episodes)
+    print('step = {0}: Test Average Return = {1}'.format(step, avg_return_test))
     returns.append(avg_return)
 
 iterations = range(0, num_iterations + 1, eval_interval)

@@ -555,7 +555,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
             return ts.termination(new_state, reward=reward)
         else:
             return ts.transition(
-                new_state, reward=reward, discount=0.1
+                new_state, reward=reward, discount=0
             )
 
     def gen_state_data(self):
@@ -690,7 +690,7 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             return ts.termination(new_state, reward=reward)
         else:
             return ts.transition(
-                new_state, reward=reward, discount=1
+                new_state, reward=reward, discount=0
             )
 
     def gen_state_data(self):

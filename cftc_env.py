@@ -24,16 +24,16 @@ CFTC_NO_USE_COLUMNS = [
 
     'Open_Interest_All',
 
-    'Dealer_Positions_Long_All',
-    'Dealer_Positions_Short_All',
+    # 'Dealer_Positions_Long_All',
+    # 'Dealer_Positions_Short_All',
     'Dealer_Positions_Spread_All',
 
-    'Asset_Mgr_Positions_Long_All',
-    'Asset_Mgr_Positions_Short_All',
+    # 'Asset_Mgr_Positions_Long_All',
+    # 'Asset_Mgr_Positions_Short_All',
     'Asset_Mgr_Positions_Spread_All',
 
-    'Lev_Money_Positions_Long_All',
-    'Lev_Money_Positions_Short_All',
+    # 'Lev_Money_Positions_Long_All',
+    # 'Lev_Money_Positions_Short_All',
     'Lev_Money_Positions_Spread_All',
 
     'Other_Rept_Positions_Long_All',
@@ -60,8 +60,8 @@ CFTC_NO_USE_COLUMNS = [
     # 'Change_in_Lev_Money_Short_All',
     'Change_in_Lev_Money_Spread_All',
 
-    # 'Change_in_Other_Rept_Long_All',
-    # 'Change_in_Other_Rept_Short_All',
+    'Change_in_Other_Rept_Long_All',
+    'Change_in_Other_Rept_Short_All',
     'Change_in_Other_Rept_Spread_All',
 
     'Change_in_Tot_Rept_Long_All',

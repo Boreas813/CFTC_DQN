@@ -133,3 +133,9 @@ dmypy.json
 /.idea
 /log/*
 /.vscode
+
+# policy chache
+/dqn_policy
+
+# mean std
+*.pickle

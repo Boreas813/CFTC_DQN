@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 import re
 
-GOAL_DIR = '../history_data/CFTC_EURUSD.csv'
+GOAL_DIR = '../training_data/CFTC_EURUSD.csv'
 TITLE_LIST = [
     'Market_and_Exchange_Names',
     'As_of_Date_In_Form_YYMMDD',
@@ -123,6 +123,10 @@ for i in F_TFF_file_name:
                 count += 1
                 continue
             if line.startswith('"EURO FX - CHICAGO MERCANTILE EXCHANGE"') or line.startswith('EURO FX - CHICAGO MERCANTILE EXCHANGE'):
+                line = line.replace('CME ,00,090', 'CME ,00.090')
+                line = line.replace('CME ,00,099', 'CME ,00.099')
+                line = line.replace('"(CONTRACTS OF CAD 100,000)"', '"(CONTRACTS OF CAD 100000)"')
+                line = line.replace('"(CONTRACTS OF EUR 125,000)"', '"(CONTRACTS OF EUR 125000)"')
                 line_list = list(map(lambda x: x.strip(),line.split(',')))
                 date = line_list[2]
                 if re.search(r'.+/.+/.+', date):

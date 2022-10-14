@@ -26,11 +26,11 @@ print(tf.version.VERSION)
 
 symbol = 'EURUSD'
 
-num_iterations = 200000  # @param {type:"integer"}
-initial_collect_steps = 64  # @param {type:"integer"}
+num_iterations = 170000  # @param {type:"integer"}
+initial_collect_steps = 100  # @param {type:"integer"}
 collect_steps_per_iteration = 1  # @param {type:"integer"}
-replay_buffer_max_length = 64  # @param {type:"integer"}
-batch_size = 64  # @param {type:"integer"}
+replay_buffer_max_length = 16  # @param {type:"integer"}
+batch_size = 32  # @param {type:"integer"}
 learning_rate = 1e-3  # @param {type:"number"}
 log_interval = 200  # @param {type:"integer"}
 num_eval_episodes = 1  # @param {type:"integer"}
@@ -196,6 +196,7 @@ collect_driver = py_driver.PyDriver(
 	[rb_observer],
 	max_steps=collect_steps_per_iteration)
 
+
 for _ in range(num_iterations):
 	# Collect a few steps and save to the replay buffer.
 	time_step, _ = collect_driver.run(time_step)
@@ -222,5 +223,5 @@ plt.plot(iterations, eval_returns, color='red')
 plt.plot(iterations, test_returns, color='#054E9F')
 plt.ylabel('Average Return')
 plt.xlabel('Iterations')
-plt.ylim(top=50000)
+plt.ylim(top=55000)
 plt.show()

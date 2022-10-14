@@ -143,7 +143,7 @@ class TradingEnv(py_environment.PyEnvironment):
         self._state = self.train_data[0:self.review_week].reshape((self.ob_shape,))
         self._state_count = self.review_week - 1
         self._episode_ended = False
-        self.mul, self.single_prpfit, self.spread = self.get_base_point(symbol)
+        self.mul, self.single_profit, self.spread = self.get_base_point(symbol)
 
     @staticmethod
     def get_base_point(symbol):
@@ -289,7 +289,7 @@ class TradingEnv(py_environment.PyEnvironment):
         print(f'训练集数据序列：0:{train_end}')
 
         train_data = train_data.reset_index(drop=True)
-        train_date = train_data['As_of_Date_In_Form_YYMMDD']
+        train_date = train_data['Report_Date_as_YYYY-MM-DD']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -312,13 +312,6 @@ class TradingEnv(py_environment.PyEnvironment):
 
         train_data = (train_data - train_mean) / train_std
 
-        # 调整数据排列顺序
-        # order = ['funds_hold_long', 'funds_hold_short', 'funds_hold_spread', 'coms_hold_long', 'coms_hold_short',
-        #              'all_hold_long', 'all_hold_short', 'non_report_long', 'non_report_short', 'funds_change_long',
-        #              'funds_change_short', 'funds_change_spread', 'coms_change_long', 'coms_change_short',
-        #              'all_change_long', 'all_change_short', 'non_report_change_long', 'non_report_change_short']
-        # train_data = train_data[order]
-
         train_data_array = train_data.values
         price_data = pd.read_csv(f'training_data/{self.symbol}10080.csv')
         price_data.set_index(['date_time'], inplace=True)
@@ -336,7 +329,7 @@ class TradingEnvVal(py_environment.PyEnvironment):
         self.mode = mode
         self.hold_how_many_week = hold_week
         self.review_week = review_week
-        self.mul, self.single_prpfit, self.spread = TradingEnv.get_base_point(symbol)
+        self.mul, self.single_profit, self.spread = TradingEnv.get_base_point(symbol)
         self._action_spec = array_spec.BoundedArraySpec(
             shape=(), dtype=np.int64, minimum=0, maximum=1, name='action'
         )
@@ -422,8 +415,8 @@ class TradingEnvVal(py_environment.PyEnvironment):
                 start_index = 0
             else:
                 for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime('20' + str(row['As_of_Date_In_Form_YYMMDD']), '%Y%m%d')
-                    time_2 = datetime.datetime.strptime('20' + str(train_data[index+1:index+2]['As_of_Date_In_Form_YYMMDD'].values[0]), '%Y%m%d')
+                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
+                    time_2 = datetime.datetime.strptime(str(train_data[index+1:index+2]['As_of_Date_In_Form_YYMMDD'].values[0]), '%Y-%m-%d')
                     if time_1 <= self.start_time - datetime.timedelta(days=21) <= time_2:
                         start_index = index
                         break
@@ -434,8 +427,8 @@ class TradingEnvVal(py_environment.PyEnvironment):
                 end_index = -1
             else:
                 for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime('20' + str(row['As_of_Date_In_Form_YYMMDD']), '%Y%m%d')
-                    time_2 = datetime.datetime.strptime('20' + str(train_data[index + 1:index + 2]['date_time'].values[0]), '%Y%m%d')
+                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
+                    time_2 = datetime.datetime.strptime(str(train_data[index + 1:index + 2]['date_time'].values[0]), '%Y-%m-%d')
                     if time_1 <= self.end_time <= time_2:
                         end_index = index
                         break
@@ -447,7 +440,7 @@ class TradingEnvVal(py_environment.PyEnvironment):
                 train_data = train_data[start_index:end_index]
             train_data = train_data.reset_index(drop=True)
 
-        train_date = train_data['As_of_Date_In_Form_YYMMDD']
+        train_date = train_data['Report_Date_as_YYYY-MM-DD']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -488,7 +481,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
         self.mode = mode
         self.hold_how_many_week = hold_week
         self.review_week = review_week
-        self.mul, self.single_prpfit, self.spread = TradingEnv.get_base_point(symbol)
+        self.mul, self.single_profit, self.spread = TradingEnv.get_base_point(symbol)
         self._action_spec = array_spec.BoundedArraySpec(
             shape=(), dtype=np.int64, minimum=0, maximum=1, name='action'
         )
@@ -565,7 +558,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
             train_len = len(train_data)
             test_cut_start = int(train_len * (TRAIN_CUT_PERCENT+VAL_CUT_PERCENT))
             train_data = train_data[test_cut_start:].reset_index(drop=True)
-            print(f'测试集数据序列：{test_cut_start}:')
+            print(f'测试集数据序列：{test_cut_start}:{train_len}')
         # 回测实盘阶段
         else:
             train_data = train_data.reset_index(drop=True)
@@ -573,8 +566,8 @@ class TradingEnvTest(py_environment.PyEnvironment):
                 start_index = 0
             else:
                 for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime('20' + str(row['As_of_Date_In_Form_YYMMDD']), '%Y%m%d')
-                    time_2 = datetime.datetime.strptime('20' + str(train_data[index+1:index+2]['As_of_Date_In_Form_YYMMDD'].values[0]), '%Y%m%d')
+                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
+                    time_2 = datetime.datetime.strptime(str(train_data[index+1:index+2]['Report_Date_as_YYYY-MM-DD'].values[0]), '%Y-%m-%d')
                     if time_1 <= self.start_time - datetime.timedelta(days=21) <= time_2:
                         start_index = index
                         break
@@ -585,7 +578,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
                 end_index = -1
             else:
                 for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime('20' + str(row['As_of_Date_In_Form_YYMMDD']), '%Y%m%d')
+                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
                     time_2 = datetime.datetime.strptime('20' + str(train_data[index + 1:index + 2]['date_time'].values[0]), '%Y%m%d')
                     if time_1 <= self.end_time <= time_2:
                         end_index = index
@@ -598,7 +591,7 @@ class TradingEnvTest(py_environment.PyEnvironment):
                 train_data = train_data[start_index:end_index]
             train_data = train_data.reset_index(drop=True)
 
-        train_date = train_data['As_of_Date_In_Form_YYMMDD']
+        train_date = train_data['Report_Date_as_YYYY-MM-DD']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -620,22 +613,6 @@ class TradingEnvTest(py_environment.PyEnvironment):
         #     pickle.dump(train_std, f, True)
 
         train_data = (train_data - train_mean) / train_std
-
-        # 调整数据排列顺序
-        # if self.version == '1.0':
-        #     if self.symbol in ['EURUSD']:
-        #         order = ['funs_long', 'funs_short', 'com_long', 'com_short']
-        #     elif self.symbol in ['GBPUSD', 'GOLD']:
-        #         order = ['funs_long', 'funs_short', 'com_long', 'com_short', 'funds_hold']
-        #     else:
-        #         order = ['funds_hold_long','funds_hold_short','funds_hold_spread','coms_hold_long','coms_hold_short','all_hold_long','all_hold_short','non_report_long','non_report_short','funds_change_long','funds_change_short','funds_change_spread','coms_change_long','coms_change_short','all_change_long','all_change_short','non_report_change_long','non_report_change_short']
-        # else:
-        #     order = ['funds_hold_long', 'funds_hold_short', 'funds_hold_spread', 'coms_hold_long', 'coms_hold_short',
-        #              'all_hold_long', 'all_hold_short', 'non_report_long', 'non_report_short', 'funds_change_long',
-        #              'funds_change_short', 'funds_change_spread', 'coms_change_long', 'coms_change_short',
-        #              'all_change_long', 'all_change_short', 'non_report_change_long', 'non_report_change_short']
-
-        # train_data = train_data[order]
 
         train_data_array = train_data.values
         price_data = pd.read_csv(f'training_data/{self.symbol}10080.csv')

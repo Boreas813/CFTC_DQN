@@ -1,3 +1,4 @@
-tf-agents[reverb]  # linux only, not support windows
+tf-agents[reverb]  # linux only
 pandas
 matplotlib
+# apt-get install python3-tk

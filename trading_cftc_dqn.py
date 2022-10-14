@@ -1,3 +1,5 @@
+import os
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +16,7 @@ from tf_agents.metrics import tf_metrics
 from tf_agents.networks import sequential
 from tf_agents.policies import py_tf_eager_policy
 from tf_agents.policies import random_tf_policy
+from tf_agents.policies import policy_saver
 from tf_agents.replay_buffers import reverb_replay_buffer
 from tf_agents.replay_buffers import reverb_utils
 from tf_agents.trajectories import trajectory
@@ -196,6 +199,17 @@ collect_driver = py_driver.PyDriver(
 	[rb_observer],
 	max_steps=collect_steps_per_iteration)
 
+base_policy_dir = 'dqn_policy'
+for i in range(1,100000):
+	full_policy_dir = os.path.join(base_policy_dir, str(i))
+	if not os.path.exists(full_policy_dir):
+		os.makedirs(full_policy_dir)
+		break
+	else:
+		continue
+else:
+	raise ValueError('too many train result')
+tf_policy_saver = policy_saver.PolicySaver(agent.policy)
 
 for _ in range(num_iterations):
 	# Collect a few steps and save to the replay buffer.
@@ -216,6 +230,7 @@ for _ in range(num_iterations):
 		eval_returns.append(avg_return_eval)
 		avg_return_test = compute_avg_return(test_env, agent.policy, num_eval_episodes)
 		print('step = {0}: Test Average Return = {1}'.format(step, avg_return_test))
+		tf_policy_saver.save(os.path.join(full_policy_dir, str(step)))
 		test_returns.append(avg_return_test)
 
 iterations = range(0, num_iterations + 1, eval_interval)
@@ -224,4 +239,5 @@ plt.plot(iterations, test_returns, color='#054E9F')
 plt.ylabel('Average Return')
 plt.xlabel('Iterations')
 plt.ylim(top=55000)
-plt.show()
+plt.savefig(os.path.join(full_policy_dir, 'result.jpg'))
+# plt.show()

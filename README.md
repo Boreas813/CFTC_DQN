@@ -1,44 +1,30 @@
 # CFTC_DQN
-An reinforcement learning model for trading based onCFTC reports
+基于CFTC报告的增强学习交易模型
+
+## 训练你自己的模型
+
+什么是增强学习？ https://en.wikipedia.org/wiki/Reinforcement_learning
+
+什么是DQN？ https://openai.com/blog/openai-baselines-dqn/
+
+什么是CFTC报告？ https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm
+
+如何使用tensorflow训练DQN？ https://www.tensorflow.org/agents/tutorials/1_dqn_tutorial
+
+## 数据源
+
+CFTC报告和周线历史数据放在history_data文件夹
+
+CFTC历史数据来源:
+https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm
+
+价格历史数据源自我的交易商：
+https://www.avatrade.com/
 
 
-I use 2008.1-2019.2, this time period data for training set. 2019.3-2021.8 for test set and real money test since 2021.9. Trading strategy is simple, algorithm reviews three weeks of CFTC reports and makes a trading decision: go long or short. It then holds the position for two weeks and then closes it out.
-Trading symbols include EURUSD, GBPUSD, AUDUSD, GOLD.The following is Performance of CFTC_DQN trading model:
-![train.png](doc/train.png)
-The figure above shows the performance of the model on the training set.
+## 使用警告
 
-![val.png](doc/val.png)
-The figure above shows the performance of the model on the test set.Note that the profit is expressed as a decimal and is not reinvested using compound interest.For example, a 0.5 here in profit means profit of 50%.
-
-![test.png](doc/test.png)
-The figure above shows the performance of the model on the real money test without manual intervention.The algorithm worked well during the Omicron epidemic and the Ukraine conflict, especially gold.
-
-
-Let's say we add a little manual intervention, if the profit reaches 0.8 times ATR(period 3), we close half of the position, other unchanged.
-
-## Create your own model
-
-What is reinforcement learning? https://en.wikipedia.org/wiki/Reinforcement_learning
-
-What is DQN? https://openai.com/blog/openai-baselines-dqn/
-
-What is CFTC report? https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm
-
-How to make a DQN with tensorflow? https://www.tensorflow.org/agents/tutorials/1_dqn_tutorial
-
-## data sources
-
-CFTC and weekly price history data all in history folder.
-
-CFTC history data from:https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm
-
-Price history data from my forex dealer:https://www.avatrade.com/
-
-
-## CAUTIONS IN USE
-1. Reinforcement learning models are black boxes, we can't check if it's working good or whether it fits the current market environment.
-2. Markets are constantly changing, look at the yield curve of EURUSD, As the ECB's unlimited easing policy has led to increasing liquidity and lower volatility in EUR. When market conditions change, models must be retrained.
-3. Make sure the model can survive a market crash such as 2008.7/2020.3/2021.12/2022.2 
-4. Double check that the input data is correct, every input parameter still corresponds when you translate it into tensor.
-
-
+1. 增强学习模型是黑盒科技，我们无法知道市场环境发生巨大变化后它是否还正常工作。
+2. 市场一直在变化，请看EURUSD的资金曲线，当欧洲央行将利率降至负值后，流动性变高波动性越来越低。当市场发生巨变后，模型必须被重新训练。
+3. 确保模型可以撑过各种危机，例如2008.7、2020.3、2021.12、2022.2。
+4. 反复确认输入数据是否正确，确保每个训练参数转成tensor后不出现错位等bug，垃圾进垃圾出。

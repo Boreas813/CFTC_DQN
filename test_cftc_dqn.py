@@ -36,6 +36,11 @@ symbol_dict = {
     # 'GOLD':1921000,
     # 'COCOA':364000,
 }
+config_reader = configparser.ConfigParser()
+config_reader.read('config/config.ini', encoding='utf-8')
+ob_shape = config_reader.getint(section='CFTC', option='ob_shape')
+hold_week = config_reader.getint(section='CFTC', option='hold_week')
+review_week = config_reader.getint(section='CFTC', option='review_week')
 
 start_date_str = '2010-01-0500:00'
 end_date_str = '2022-04-0500:00'
@@ -75,17 +80,22 @@ def compute_avg_return(environment, policy, policy_num, symbol):
 
 
 # 范围测试
-def range_test(symbol):
-    policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy')
+def range_test(symbol, policy_num):
+    policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy', policy_num)
     eval_interval = 500
-    eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=36, hold_week=2, review_week=3)
+    eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
+    test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
+                             end_time=None)
+    test_env = tf_py_environment.TFPyEnvironment(test_py_env)
     for i in range(1000,170000):
         if i % eval_interval == 0:
             policy_dir = os.path.join(policy_base_dir, f'{i}')
             saved_policy = tf.compat.v2.saved_model.load(policy_dir)
-            avg_return = compute_avg_return(eval_env, saved_policy, i, symbol)
-            print('step = {0}: Average Return = {1}'.format(1, avg_return))
+            avg_return_eval = compute_avg_return(eval_env, saved_policy, i, symbol)
+            avg_return_test = compute_avg_return(test_env, saved_policy, i, symbol)
+            print('step = {0}: Eval Average Return = {1}'.format(1, avg_return_eval))
+            print('step = {0}: Test Average Return = {1}'.format(1, avg_return_test))
 
 # 独立测试
 def single_test(number, symbol):
@@ -136,18 +146,18 @@ def product_single_test():
     # symbol_dict['SUM'] = 0
     write_img(sum_return_list, sum_date_list, list(symbol_dict), F'CFTC_DQN模型综合表现',tick_spacing=tick_spacing)
 
-# range_test('USDCAD')
+range_test('EURUSD')
 
-collection_list = [
-    150000,
-    # 163000,
-    # 166000,
-    # 167000,
-    # 168000,
-    # 173000,
-]
-for i in collection_list:
-    single_test(i, 'USDCAD')
+# collection_list = [
+#     150000,
+#     # 163000,
+#     # 166000,
+#     # 167000,
+#     # 168000,
+#     # 173000,
+# ]
+# for i in collection_list:
+#     single_test(i, 'USDCAD')
 
 # product_test(1832000)
 # product_single_test()

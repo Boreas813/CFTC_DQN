@@ -135,7 +135,12 @@ dmypy.json
 /.vscode
 
 # policy chache
-/dqn_policy
+dqn_policy/*
+!dqn_policy/.gitkeep
 
-# mean std
+# mean&std
 *.pickle
+
+# train config
+config/*
+!config/.gitkeep

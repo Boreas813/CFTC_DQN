@@ -1,5 +1,6 @@
 import base64
 import datetime
+import configparser
 import io
 import matplotlib
 import matplotlib.pyplot as plt
@@ -54,18 +55,17 @@ def compute_avg_return(environment, policy, policy_num, symbol):
         time_step = environment.step(action_step.action)
         print(environment.pyenv.envs[0].entry_date, action_step.action.numpy(), time_step.reward.numpy())
         episode_return += time_step.reward
-        # 计算盈利百分比 货币对除以100000 黄金除以180000
+        # 计算盈利百分比 货币对除以100000 黄金除以150000
         if symbol in ['EURUSD', 'GBPUSD', 'AUDUSD', 'USDCAD']:
             episode_return_list.append(int(episode_return.numpy())/100000)
         elif symbol in ['GOLD']:
-            episode_return_list.append(int(episode_return.numpy()) / 180000)
+            episode_return_list.append(int(episode_return.numpy()) / 150000)
         elif symbol in ['COCOA']:
             episode_return_list.append(int(episode_return.numpy()) / 2000)
         else:
             episode_return_list.append(int(episode_return.numpy()) / 200000)
         trade_date = trade_date + datetime.timedelta(days=time_bias)
         episode_date_list.append(trade_date.strftime('%Y-%m-%d%H:%M'))
-        # print(f'交易获利：{time_step.reward * mul}')
 
     print(f'{symbol} 第{policy_num}迭代交易获利：{episode_return}')
     if episode_return > -10000:
@@ -74,14 +74,13 @@ def compute_avg_return(environment, policy, policy_num, symbol):
     return avg_return.numpy()[0], episode_return_list, episode_date_list
 
 
-
 # 范围测试
 def range_test(symbol):
     policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy')
-    eval_interval = 1000
+    eval_interval = 500
     eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=36, hold_week=2, review_week=3)
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-    for i in range(1000,600000):
+    for i in range(1000,170000):
         if i % eval_interval == 0:
             policy_dir = os.path.join(policy_base_dir, f'{i}')
             saved_policy = tf.compat.v2.saved_model.load(policy_dir)

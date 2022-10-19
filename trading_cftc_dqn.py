@@ -1,4 +1,5 @@
 import os
+import configparser
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -29,18 +30,26 @@ print(tf.version.VERSION)
 
 symbol = 'EURUSD'
 
-num_iterations = 170000  # @param {type:"integer"}
-initial_collect_steps = 100  # @param {type:"integer"}
-collect_steps_per_iteration = 1  # @param {type:"integer"}
-replay_buffer_max_length = 16  # @param {type:"integer"}
-batch_size = 32  # @param {type:"integer"}
-learning_rate = 1e-3  # @param {type:"number"}
-log_interval = 200  # @param {type:"integer"}
-num_eval_episodes = 1  # @param {type:"integer"}
-eval_interval = 500  # @param {type:"integer"}
+config_reader = configparser.ConfigParser()
+config_reader.read('config/config.ini', encoding='utf-8')
+
+
+num_iterations = config_reader.getint(section='CFTC', option='num_iterations')
+initial_collect_steps = config_reader.getint(section='CFTC', option='initial_collect_steps')
+collect_steps_per_iteration = config_reader.getint(section='CFTC', option='collect_steps_per_iteration')
+replay_buffer_max_length = config_reader.getint(section='CFTC', option='replay_buffer_max_length')
+batch_size = config_reader.getint(section='CFTC', option='batch_size')
+learning_rate = config_reader.getfloat(section='CFTC', option='learning_rate')
+log_interval = config_reader.getint(section='CFTC', option='log_interval')
+num_eval_episodes = config_reader.getint(section='CFTC', option='num_eval_episodes')
+eval_interval = config_reader.getint(section='CFTC', option='eval_interval')
+
+ob_shape = config_reader.getint(section='CFTC', option='ob_shape')
+hold_week = config_reader.getint(section='CFTC', option='hold_week')
+review_week = config_reader.getint(section='CFTC', option='review_week')
 
 # for test
-env = TradingEnv(symbol=symbol, ob_shape=36, hold_week=2, review_week=3)
+env = TradingEnv(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
 print('Observation Spec:')
 print(env.time_step_spec().observation)
 print('Reward Spec:')
@@ -55,9 +64,9 @@ next_time_step = env.step(action)
 print('Next time step:')
 print(next_time_step)
 #
-train_py_env = TradingEnv(symbol, ob_shape=36, hold_week=2, review_week=3)
-eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=36, hold_week=2, review_week=3, start_time=None, end_time=None)
-test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=36, hold_week=2, review_week=3, start_time=None,
+train_py_env = TradingEnv(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
+test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
                              end_time=None)
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)

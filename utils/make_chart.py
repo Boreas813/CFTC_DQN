@@ -42,4 +42,13 @@ def write_img(profit_list, date_list, symbol_list, title, tick_spacing):
     plt.legend()
     plt.show()
 
-
+def draw_polyline(df):
+    import plotly.express as px
+    # df = px.data.stocks()
+    fig = px.line(df, x="date", y=df.columns,
+                  hover_data={"date": "|%B %d, %Y"})
+    fig.update_xaxes(
+        dtick="M1",
+        tickformat="%b\n%Y")
+    fig.update_layout(title='Baseline', xaxis_title='Date', yaxis_title='Percentage of profit')
+    fig.show()

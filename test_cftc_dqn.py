@@ -27,7 +27,7 @@ from tf_agents.trajectories import trajectory
 from tf_agents.utils import common
 
 from cftc_env import TradingEnvVal, TradingEnvTest
-from utils.make_chart import write_img
+from utils.make_chart import write_img, draw_polyline
 
 symbol_dict = {
     # 'EURUSD':957000,
@@ -84,9 +84,11 @@ def range_test(symbol, policy_num):
     policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy', policy_num)
     eval_interval = 500
     eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+    eval_start_date = eval_py_env.train_date[0:1].values[0]
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
     test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
                              end_time=None)
+    test_start_date = test_py_env.train_date[0:1].values[0]
     test_env = tf_py_environment.TFPyEnvironment(test_py_env)
     for i in range(1000,170000):
         if i % eval_interval == 0:

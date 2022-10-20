@@ -144,7 +144,7 @@ class TradingEnv(py_environment.PyEnvironment):
         self._state_count = self.review_week - 1
         self._episode_ended = False
         self.mul, self.single_profit, self.spread = self.get_base_point(symbol)
-
+        self.entry_date = None
     @staticmethod
     def get_base_point(symbol):
         if 'USD' in symbol:
@@ -251,6 +251,7 @@ class TradingEnv(py_environment.PyEnvironment):
         report_date = pd.to_datetime(str(self.train_date[self._state_count]))
         entry_date = report_date + datetime.timedelta(days=5)
         entry_date_str = entry_date.strftime(format='%Y.%m.%d')
+        self.entry_date = entry_date_str
 
         price_df = self.price_data[entry_date_str:]
         entry_price = price_df[0:1]['open'].values[0]

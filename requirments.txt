@@ -2,3 +2,4 @@ tf-agents[reverb]  # linux only
 pandas
 matplotlib
 # apt-get install python3-tk
+chart-studio

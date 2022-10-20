@@ -72,11 +72,6 @@ def compute_avg_return(environment, policy, policy_num, symbol, start_date):
         episode_date_list.append(trade_date.strftime('%Y-%m-%d'))
 
     print(f'{symbol} 第{policy_num}迭代交易获利：{episode_return}')
-    if episode_return > 30000:
-        df = pd.DataFrame()
-        df['date'] = episode_date_list
-        df['profit_curve'] = episode_return_list
-        draw_polyline(df, f'{policy_num}', 'profit')
         # write_img([episode_return_list], [episode_date_list], [symbol], F'CFTC_DQN_{policy_num}', tick_spacing=tick_spacing)
     avg_return = episode_return
     return avg_return.numpy()[0], episode_return_list, episode_date_list
@@ -100,9 +95,23 @@ def range_test(symbol, policy_num):
         if i % eval_interval == 0:
             policy_dir = os.path.join(policy_base_dir, f'{i}')
             saved_policy = tf.compat.v2.saved_model.load(policy_dir)
-            avg_return_train = compute_avg_return(train_env, saved_policy, i, symbol, train_start_date)
-            avg_return_eval = compute_avg_return(eval_env, saved_policy, i, symbol, eval_start_date)
-            avg_return_test = compute_avg_return(test_env, saved_policy, i, symbol, test_start_date)
+            avg_return_train, return_list_train, return_date_train = compute_avg_return(train_env, saved_policy, i, symbol, train_start_date)
+            avg_return_eval, return_list_eval, return_date_eval = compute_avg_return(eval_env, saved_policy, i, symbol, eval_start_date)
+            avg_return_test, return_list_test, return_date_test = compute_avg_return(test_env, saved_policy, i, symbol, test_start_date)
+            if avg_return_train > 30000 and avg_return_eval > 30000 and avg_return_test> 30000:
+                df = pd.DataFrame()
+                df['date'] = return_date_train
+                df['train profit'] = return_list_train
+                draw_polyline(df, f'{i}', 'profit')
+                df = pd.DataFrame()
+                df['date'] = return_date_eval
+                df['eval profit'] = return_list_eval
+                draw_polyline(df, f'{i}', 'profit')
+                df = pd.DataFrame()
+                df['date'] = return_date_test
+                df['test profit'] = return_list_test
+                draw_polyline(df, f'{i}', 'profit')
+
             # print('step = {0}: Erain Average Return = {1}'.format(1, avg_return_train))
             # print('step = {0}: Eval Average Return = {1}'.format(1, avg_return_eval))
             # print('step = {0}: Test Average Return = {1}'.format(1, avg_return_test))

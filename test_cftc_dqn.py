@@ -136,9 +136,14 @@ def range_test(symbol, policy_num_min, policy_num_max):
 def single_test(symbol, policy_num, iter_num):
     policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
     saved_policy = tf.saved_model.load(policy_dir)
-    eval_py_env = TradingEnvTest(symbol=symbol, mode='product', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
+    eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+    eval_start_date = eval_py_env.train_date[0:1].values[0]
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-    avg_return = compute_avg_return(eval_env, saved_policy, policy_num, symbol, eval_py_env.train_date[0:1].values[0])
+    test_py_env = TradingEnvTest(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
+    test_start_date = test_py_env.train_date[0:1].values[0]
+    test_env = tf_py_environment.TFPyEnvironment(eval_py_env)
+    eval_avg_return = compute_avg_return(eval_env, saved_policy, policy_num, symbol, eval_start_date)
+    test_avg_return = compute_avg_return(test_env, saved_policy, policy_num, symbol, test_start_date)
     print('step = {0}: Average Return = {1}'.format(1, avg_return))
 
 

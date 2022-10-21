@@ -672,8 +672,11 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'CFTC_{self.symbol}_product.csv')
-        del(train_data['date_time'])
+        train_data = pd.read_csv(f'product_data/CFTC_{self.symbol}_product.csv')
+        train_data = train_data.reset_index(drop=True)
+        # 删掉不要的列
+        for i in CFTC_NO_USE_COLUMNS:
+            del (train_data[i])
 
         # 数据标准化
         with open(f'CFTC_{self.symbol}_2week_mean.pickle', 'rb') as f:

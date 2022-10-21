@@ -133,18 +133,17 @@ def range_test(symbol, policy_num_min, policy_num_max):
     print(best_number, best_eval, best_test)
 
 # 独立测试
-def single_test(number, symbol):
-    policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy')
-    policy_dir = os.path.join(policy_base_dir, f'{number}')
-    saved_policy = tf.compat.v2.saved_model.load(policy_dir)
-    eval_py_env = TradingEnvTest(symbol=symbol, mode='product', ob_shape=36, hold_week=2, review_week=3, start_time=None, end_time=None)
+def single_test(symbol, policy_num, iter_num):
+    policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
+    saved_policy = tf.saved_model.load(policy_dir)
+    eval_py_env = TradingEnvTest(symbol=symbol, mode='product', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-    avg_return = compute_avg_return(eval_env, saved_policy, f'{number}', symbol)
+    avg_return = compute_avg_return(eval_env, saved_policy, policy_num, symbol, eval_py_env.train_date[0:1].values[0])
     print('step = {0}: Average Return = {1}'.format(1, avg_return))
 
 
 # 生产测试
-def product_test(number):
+def product_test(number, symbol):
     policy_base_dir = os.path.join(os.getcwd(), f'goal\\CFTC_{symbol}_2week')
     policy_dir = os.path.join(policy_base_dir, f'{number}')
     saved_policy = tf.compat.v2.saved_model.load(policy_dir)

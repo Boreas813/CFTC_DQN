@@ -1,3 +1,4 @@
+from audioop import avg
 import base64
 import datetime
 import configparser
@@ -57,7 +58,7 @@ def compute_avg_return(environment, policy, policy_num, symbol, start_date):
     while not time_step.is_last():
         action_step = policy.action(time_step)
         time_step = environment.step(action_step.action)
-        print(environment.pyenv.envs[0].entry_date, action_step.action.numpy(), time_step.reward.numpy())
+        # print(environment.pyenv.envs[0].entry_date, action_step.action.numpy(), time_step.reward.numpy())
         episode_return += time_step.reward
         # 计算盈利百分比 货币对除以100000 黄金除以150000
         if symbol in ['EURUSD', 'GBPUSD', 'AUDUSD', 'USDCAD']:
@@ -71,51 +72,66 @@ def compute_avg_return(environment, policy, policy_num, symbol, start_date):
         trade_date = trade_date + datetime.timedelta(days=time_bias)
         episode_date_list.append(trade_date.strftime('%Y-%m-%d'))
 
-    print(f'{symbol} 第{policy_num}迭代交易获利：{episode_return}')
+    print(f'{symbol} 第{policy_num}迭代交易获利：{episode_return} start_date:{start_date}')
         # write_img([episode_return_list], [episode_date_list], [symbol], F'CFTC_DQN_{policy_num}', tick_spacing=tick_spacing)
     avg_return = episode_return
     return avg_return.numpy()[0], episode_return_list, episode_date_list
 
 
 # 范围测试
-def range_test(symbol, policy_num):
-    policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num))
-    eval_interval = 500
-    train_py_env = TradingEnv(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
-    train_start_date = train_py_env.train_date[0:1].values[0]
-    train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-    eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
-    eval_start_date = eval_py_env.train_date[0:1].values[0]
-    eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-    test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
-                             end_time=None)
-    test_start_date = test_py_env.train_date[0:1].values[0]
-    test_env = tf_py_environment.TFPyEnvironment(test_py_env)
-    for i in range(15000,50000):
-        if i % eval_interval == 0:
-            policy_dir = os.path.join(policy_base_dir, f'{i}')
-            saved_policy = tf.compat.v2.saved_model.load(policy_dir)
-            avg_return_train, return_list_train, return_date_train = compute_avg_return(train_env, saved_policy, i, symbol, train_start_date)
-            avg_return_eval, return_list_eval, return_date_eval = compute_avg_return(eval_env, saved_policy, i, symbol, eval_start_date)
-            avg_return_test, return_list_test, return_date_test = compute_avg_return(test_env, saved_policy, i, symbol, test_start_date)
-            if avg_return_train > 30000 and avg_return_eval > 30000 and avg_return_test> 30000:
-                df = pd.DataFrame()
-                df['date'] = return_date_train
-                df['train profit'] = return_list_train
-                draw_polyline(df, f'{i}', 'profit')
-                df = pd.DataFrame()
-                df['date'] = return_date_eval
-                df['eval profit'] = return_list_eval
-                draw_polyline(df, f'{i}', 'profit')
-                df = pd.DataFrame()
-                df['date'] = return_date_test
-                df['test profit'] = return_list_test
-                draw_polyline(df, f'{i}', 'profit')
+def range_test(symbol, policy_num_min, policy_num_max):
+    best_train = 0
+    best_eval = 0
+    best_test = 0
+    best_number = ''
+    for policy_num in range(policy_num_min, policy_num_max+1):
+        print(f'start {policy_num}')
+        policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num))
+        eval_interval = 500
+        train_py_env = TradingEnv(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+        train_start_date = train_py_env.train_date[0:1].values[0]
+        train_env = tf_py_environment.TFPyEnvironment(train_py_env)
+        eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+        eval_start_date = eval_py_env.train_date[0:1].values[0]
+        eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
+        test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
+                                end_time=None)
+        test_start_date = test_py_env.train_date[0:1].values[0]
+        test_env = tf_py_environment.TFPyEnvironment(test_py_env)
+        for i in range(500,120000):
+            if i % eval_interval == 0:
+                policy_dir = os.path.join(policy_base_dir, f'{i}')
+                saved_policy = tf.compat.v2.saved_model.load(policy_dir)
+                avg_return_train, return_list_train, return_date_train = compute_avg_return(train_env, saved_policy, i, symbol, train_start_date)
+                avg_return_eval, return_list_eval, return_date_eval = compute_avg_return(eval_env, saved_policy, i, symbol, eval_start_date)
+                avg_return_test, return_list_test, return_date_test = compute_avg_return(test_env, saved_policy, i, symbol, test_start_date)
+                print('')
+                # if avg_return_train > 30000 and avg_return_eval > 25000 and avg_return_test> 30000:
+                #     df = pd.DataFrame()
+                #     df['date'] = return_date_train
+                #     df['train profit'] = return_list_train
+                #     draw_polyline(df, f'{i}', 'profit')
+                #     df = pd.DataFrame()
+                #     df['date'] = return_date_eval
+                #     df['eval profit'] = return_list_eval
+                #     draw_polyline(df, f'{i}', 'profit')
+                #     df = pd.DataFrame()
+                #     df['date'] = return_date_test
+                #     df['test profit'] = return_list_test
+                #     draw_polyline(df, f'{i}', 'profit')
 
-            # print('step = {0}: Erain Average Return = {1}'.format(1, avg_return_train))
-            # print('step = {0}: Eval Average Return = {1}'.format(1, avg_return_eval))
-            # print('step = {0}: Test Average Return = {1}'.format(1, avg_return_test))
-            
+                # print('step = {0}: Erain Average Return = {1}'.format(1, avg_return_train))
+                # print('step = {0}: Eval Average Return = {1}'.format(1, avg_return_eval))
+                # print('step = {0}: Test Average Return = {1}'.format(1, avg_return_test))
+                if avg_return_train >= best_train and avg_return_eval >= best_eval and avg_return_test >= best_test:
+                    best_train = avg_return_train
+                    best_test = avg_return_test
+                    best_eval = avg_return_eval
+                    best_number = f'{policy_num} {i}'
+                    print(f'new best num found:{best_number} {best_eval} {best_test}')
+                print('best number now:', best_number, best_eval, best_test)
+    print(best_number, best_eval, best_test)
+
 # 独立测试
 def single_test(number, symbol):
     policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy')
@@ -165,7 +181,7 @@ def product_single_test():
     # symbol_dict['SUM'] = 0
     write_img(sum_return_list, sum_date_list, list(symbol_dict), F'CFTC_DQN模型综合表现',tick_spacing=tick_spacing)
 
-range_test('EURUSD', 5)
+range_test('EURUSD', 12, 46)
 
 # collection_list = [
 #     150000,

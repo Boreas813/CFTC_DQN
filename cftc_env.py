@@ -623,10 +623,11 @@ class TradingEnvTest(py_environment.PyEnvironment):
 
 class TradingEnvProduct(py_environment.PyEnvironment):
 
-    def __init__(self, symbol):
+    def __init__(self, symbol, ob_shape, review_week):
         super().__init__()
         self.symbol = symbol
-        self.ob_shape = 54
+        self.ob_shape = ob_shape
+        self.review_week = review_week
         self._action_spec = array_spec.BoundedArraySpec(
             shape=(), dtype=np.int64, minimum=0, maximum=1, name='action'
         )
@@ -634,7 +635,7 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             shape=(self.ob_shape,), dtype=np.float64, name='observation'
         )
         self.train_data = self.gen_state_data()
-        self._state = self.train_data[0:3].reshape((self.ob_shape,))
+        self._state = self.train_data[0:self.review_week].reshape((self.ob_shape,))
         self._episode_ended = False
 
 
@@ -672,8 +673,9 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'product_data/CFTC_{self.symbol}_product.csv')
+        train_data = pd.read_csv(f'product_cftc_data/{self.symbol}_product.csv')
         train_data = train_data.reset_index(drop=True)
+
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
             del (train_data[i])
@@ -686,6 +688,5 @@ class TradingEnvProduct(py_environment.PyEnvironment):
         train_data = (train_data - train_mean) / train_std
 
         train_data_array = train_data.values
-
         return train_data_array
 

@@ -16,7 +16,7 @@ TEST_CUT_PERCENT = 0.15
 CFTC_NO_USE_COLUMNS = [
     'Market_and_Exchange_Names',
     'As_of_Date_In_Form_YYMMDD',
-    'Report_Date_as_YYYY-MM-DD',
+    'Report_Date_as_MM_DD_YYYY',
     'CFTC_Contract_Market_Code',
     'CFTC_Market_Code',
     'CFTC_Region_Code',
@@ -110,12 +110,9 @@ CFTC_NO_USE_COLUMNS = [
     'Conc_Net_LE_4_TDR_Short_All',
     'Conc_Net_LE_8_TDR_Long_All',
     'Conc_Net_LE_8_TDR_Short_All',
-    'CFTC_Contract_Market_Code_Quotes',
-    'CFTC_Market_Code_Quotes',
-    'CFTC_Commodity_Code_Quotes',
+    'Contract_Units',
     'CFTC_SubGroup_Code',
     'FutOnly_or_Combined',
-    'Contract_Units'
 ]
 
 
@@ -283,14 +280,14 @@ class TradingEnv(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'training_data/CFTC_{self.symbol}.csv')
+        train_data = pd.read_excel(f'training_data/CFTC_{self.symbol}.xls')
         data_len = len(train_data)
         train_end = int(data_len * TRAIN_CUT_PERCENT)
         train_data = train_data[0:train_end].reset_index(drop=True)
         print(f'训练集数据序列：0:{train_end}')
 
         train_data = train_data.reset_index(drop=True)
-        train_date = train_data['Report_Date_as_YYYY-MM-DD']
+        train_date = train_data['Report_Date_as_MM_DD_YYYY']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -321,13 +318,12 @@ class TradingEnv(py_environment.PyEnvironment):
 
 class TradingEnvVal(py_environment.PyEnvironment):
 
-    def __init__(self, symbol, mode, ob_shape, hold_week, review_week, start_time=None, end_time=None):
+    def __init__(self, symbol, ob_shape, hold_week, review_week, start_time=None, end_time=None):
         super().__init__()
         self.symbol = symbol
         self.start_time = start_time
         self.end_time = end_time
         self.ob_shape = ob_shape
-        self.mode = mode
         self.hold_how_many_week = hold_week
         self.review_week = review_week
         self.mul, self.single_profit, self.spread = TradingEnv.get_base_point(symbol)
@@ -401,47 +397,15 @@ class TradingEnvVal(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'training_data/CFTC_{self.symbol}.csv')
-        # 回测开发阶段
-        if self.mode == 'dev':
-            train_len = len(train_data)
-            val_cut_start = int(train_len * TRAIN_CUT_PERCENT)
-            val_cut_end = int(train_len * (TRAIN_CUT_PERCENT+VAL_CUT_PERCENT))
-            train_data = train_data[val_cut_start:val_cut_end].reset_index(drop=True)
-            print(f'验证集数据序列：{val_cut_start}:{val_cut_end}')
-        # 回测实盘阶段
-        else:
-            train_data = train_data.reset_index(drop=True)
-            if self.start_time is None:
-                start_index = 0
-            else:
-                for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
-                    time_2 = datetime.datetime.strptime(str(train_data[index+1:index+2]['As_of_Date_In_Form_YYMMDD'].values[0]), '%Y-%m-%d')
-                    if time_1 <= self.start_time - datetime.timedelta(days=21) <= time_2:
-                        start_index = index
-                        break
-                else:
-                    start_index = 0
+        train_data = pd.read_excel(f'training_data/CFTC_{self.symbol}.xls')
 
-            if self.end_time is None:
-                end_index = -1
-            else:
-                for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
-                    time_2 = datetime.datetime.strptime(str(train_data[index + 1:index + 2]['date_time'].values[0]), '%Y-%m-%d')
-                    if time_1 <= self.end_time <= time_2:
-                        end_index = index
-                        break
-                else:
-                    end_index = -1
-            if end_index == -1:
-                train_data = train_data[start_index:]
-            else:
-                train_data = train_data[start_index:end_index]
-            train_data = train_data.reset_index(drop=True)
+        train_len = len(train_data)
+        val_cut_start = int(train_len * TRAIN_CUT_PERCENT)
+        val_cut_end = int(train_len * (TRAIN_CUT_PERCENT+VAL_CUT_PERCENT))
+        train_data = train_data[val_cut_start:val_cut_end].reset_index(drop=True)
+        print(f'验证集数据序列：{val_cut_start}:{val_cut_end}')
 
-        train_date = train_data['Report_Date_as_YYYY-MM-DD']
+        train_date = train_data['Report_Date_as_MM_DD_YYYY']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -464,7 +428,6 @@ class TradingEnvVal(py_environment.PyEnvironment):
 
         train_data = (train_data - train_mean) / train_std
 
-
         train_data_array = train_data.values
         price_data = pd.read_csv(f'training_data/{self.symbol}10080.csv')
         price_data.set_index(['date_time'], inplace=True)
@@ -473,13 +436,12 @@ class TradingEnvVal(py_environment.PyEnvironment):
 
 class TradingEnvTest(py_environment.PyEnvironment):
 
-    def __init__(self, symbol, mode, ob_shape, hold_week, review_week, start_time=None, end_time=None):
+    def __init__(self, symbol, ob_shape, hold_week, review_week, start_time=None, end_time=None):
         super().__init__()
         self.symbol = symbol
         self.start_time = start_time
         self.end_time = end_time
         self.ob_shape = ob_shape
-        self.mode = mode
         self.hold_how_many_week = hold_week
         self.review_week = review_week
         self.mul, self.single_profit, self.spread = TradingEnv.get_base_point(symbol)
@@ -553,46 +515,13 @@ class TradingEnvTest(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'training_data/CFTC_{self.symbol}.csv')
-        # 回测开发阶段
-        if self.mode == 'dev':
-            train_len = len(train_data)
-            test_cut_start = int(train_len * (TRAIN_CUT_PERCENT+VAL_CUT_PERCENT))
-            train_data = train_data[test_cut_start:].reset_index(drop=True)
-            print(f'测试集数据序列：{test_cut_start}:{train_len}')
-        # 回测实盘阶段
-        else:
-            train_data = train_data.reset_index(drop=True)
-            if self.start_time is None:
-                start_index = 0
-            else:
-                for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
-                    time_2 = datetime.datetime.strptime(str(train_data[index+1:index+2]['Report_Date_as_YYYY-MM-DD'].values[0]), '%Y-%m-%d')
-                    if time_1 <= self.start_time - datetime.timedelta(days=21) <= time_2:
-                        start_index = index
-                        break
-                else:
-                    start_index = 0
+        train_data = pd.read_excel(f'training_data/CFTC_{self.symbol}.xls')
+        train_len = len(train_data)
+        test_cut_start = int(train_len * (TRAIN_CUT_PERCENT+VAL_CUT_PERCENT))
+        train_data = train_data[test_cut_start:].reset_index(drop=True)
+        print(f'测试集数据序列：{test_cut_start}:{train_len}')
 
-            if self.end_time is None:
-                end_index = -1
-            else:
-                for index, row in train_data.iterrows():
-                    time_1 = datetime.datetime.strptime(str(row['Report_Date_as_YYYY-MM-DD']), '%Y-%m-%d')
-                    time_2 = datetime.datetime.strptime('20' + str(train_data[index + 1:index + 2]['date_time'].values[0]), '%Y%m%d')
-                    if time_1 <= self.end_time <= time_2:
-                        end_index = index
-                        break
-                else:
-                    end_index = -1
-            if end_index == -1:
-                train_data = train_data[start_index:]
-            else:
-                train_data = train_data[start_index:end_index]
-            train_data = train_data.reset_index(drop=True)
-
-        train_date = train_data['Report_Date_as_YYYY-MM-DD']
+        train_date = train_data['Report_Date_as_MM_DD_YYYY']
 
         # 删掉不要的列
         for i in CFTC_NO_USE_COLUMNS:
@@ -673,7 +602,7 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             )
 
     def gen_state_data(self):
-        train_data = pd.read_csv(f'product_cftc_data/{self.symbol}_product.csv')
+        train_data = pd.read_excel(f'product_cftc_data/{self.symbol}_product.xls')
         train_data = train_data.reset_index(drop=True)
 
         # 删掉不要的列
@@ -689,4 +618,3 @@ class TradingEnvProduct(py_environment.PyEnvironment):
 
         train_data_array = train_data.values
         return train_data_array
-

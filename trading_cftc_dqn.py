@@ -65,9 +65,8 @@ print('Next time step:')
 print(next_time_step)
 #
 train_py_env = TradingEnv(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
-eval_py_env = TradingEnvVal(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
-test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
-                             end_time=None)
+eval_py_env = TradingEnvVal(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
+test_py_env = TradingEnvTest(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 test_env = tf_py_environment.TFPyEnvironment(test_py_env)

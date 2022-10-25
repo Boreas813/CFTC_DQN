@@ -3,3 +3,4 @@ pandas
 matplotlib
 # apt-get install python3-tk
 chart-studio
+xlrd

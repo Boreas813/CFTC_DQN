@@ -87,18 +87,18 @@ def range_test(symbol, policy_num_min, policy_num_max):
     for policy_num in range(policy_num_min, policy_num_max+1):
         print(f'start {policy_num}')
         policy_base_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num))
-        eval_interval = 500
+        eval_interval = 400
         train_py_env = TradingEnv(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
         train_start_date = train_py_env.train_date[0:1].values[0]
         train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-        eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+        eval_py_env = TradingEnvVal(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
         eval_start_date = eval_py_env.train_date[0:1].values[0]
         eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-        test_py_env = TradingEnvTest(symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
+        test_py_env = TradingEnvTest(symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None,
                                 end_time=None)
         test_start_date = test_py_env.train_date[0:1].values[0]
         test_env = tf_py_environment.TFPyEnvironment(test_py_env)
-        for i in range(9000,120000):
+        for i in range(eval_interval*8,100000):
             if i % eval_interval == 0:
                 policy_dir = os.path.join(policy_base_dir, f'{i}')
                 saved_policy = tf.compat.v2.saved_model.load(policy_dir)
@@ -136,10 +136,10 @@ def range_test(symbol, policy_num_min, policy_num_max):
 def single_test(symbol, policy_num, iter_num):
     policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
     saved_policy = tf.saved_model.load(policy_dir)
-    eval_py_env = TradingEnvVal(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+    eval_py_env = TradingEnvVal(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
     eval_start_date = eval_py_env.train_date[0:1].values[0]
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-    test_py_env = TradingEnvTest(symbol=symbol, mode='dev', ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
+    test_py_env = TradingEnvTest(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
     test_start_date = test_py_env.train_date[0:1].values[0]
     test_env = tf_py_environment.TFPyEnvironment(test_py_env)
     eval_avg_return, return_list_eval, return_date_eval = compute_avg_return(eval_env, saved_policy, policy_num, symbol, eval_start_date)
@@ -196,6 +196,15 @@ def product_single_test():
     # symbol_dict['SUM'] = 0
     write_img(sum_return_list, sum_date_list, list(symbol_dict), F'CFTC_DQN模型综合表现',tick_spacing=tick_spacing)
 
-# range_test('EURUSD', 46, 46)
-# single_test('EURUSD', 22, 18500)
-product_test('EURUSD', 22, 18500)
+# range_test('EURUSD', 1, 6)
+'''
+54 * 16
+best number now: 14 1000 17488.0 48659.0
+best number now: 31 1000 19276.0 31537.0
+
+ob_shape=18
+54 * 16
+best number now: 2 91600 27424.0 33463.0
+'''
+single_test('EURUSD', 2, 91600)
+# product_test('EURUSD', 2, 91600)

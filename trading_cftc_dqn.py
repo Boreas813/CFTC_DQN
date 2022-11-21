@@ -71,7 +71,7 @@ train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 test_env = tf_py_environment.TFPyEnvironment(test_py_env)
 
-fc_layer_params = (108, 14)
+fc_layer_params = (54, 16)
 action_tensor_spec = tensor_spec.from_spec(train_py_env.action_spec())
 num_actions = action_tensor_spec.maximum - action_tensor_spec.minimum + 1
 

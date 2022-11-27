@@ -206,5 +206,5 @@ ob_shape=18
 54 * 16
 best number now: 2 91600 27424.0 33463.0
 '''
-single_test('EURUSD', 2, 91600)
-# product_test('EURUSD', 2, 91600)
+# single_test('EURUSD', 2, 91600)
+product_test('EURUSD', 2, 91600)

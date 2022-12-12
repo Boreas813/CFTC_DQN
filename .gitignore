@@ -138,9 +138,6 @@ dmypy.json
 dqn_policy/*
 !dqn_policy/.gitkeep
 
-# mean&std
-*.pickle
-
 # train config
 config/*
 !config/.gitkeep

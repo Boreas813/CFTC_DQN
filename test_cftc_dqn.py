@@ -196,6 +196,17 @@ def product_single_test():
     # symbol_dict['SUM'] = 0
     write_img(sum_return_list, sum_date_list, list(symbol_dict), F'CFTC_DQN模型综合表现',tick_spacing=tick_spacing)
 
+# product function
+def product(symbol, policy_num, iter_num):
+    policy_dir = os.path.join(os.getcwd(), 'product_cftc_data', str(policy_num), f'{iter_num}')
+    saved_policy = tf.saved_model.load(policy_dir)
+
+    product_env_py = TradingEnvProduct(symbol, ob_shape=ob_shape, review_week=review_week)
+    product_env = tf_py_environment.TFPyEnvironment(product_env_py)
+    time_step = product_env.reset()
+    action_step = saved_policy.action(time_step)
+    print(action_step.action.numpy())
+
 # range_test('EURUSD', 1, 6)
 '''
 54 * 16
@@ -207,4 +218,5 @@ ob_shape=18
 best number now: 2 91600 27424.0 33463.0
 '''
 # single_test('EURUSD', 2, 91600)
-product_test('EURUSD', 2, 91600)
+# product_test('EURUSD', 2, 91600)
+product('EURUSD', 2, 91600)

@@ -141,3 +141,6 @@ dqn_policy/*
 # train config
 config/*
 !config/.gitkeep
+
+# postgres config
+auto_obtain_cftc_data/db.ini

@@ -28,7 +28,7 @@ from cftc_env import TradingEnv, TradingEnvVal, TradingEnvTest
 
 print(tf.version.VERSION)
 
-symbol = 'GOLD'
+symbol = 'USDJPY'
 
 config_reader = configparser.ConfigParser()
 config_reader.read('config/config.ini', encoding='utf-8')
@@ -71,7 +71,7 @@ train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 test_env = tf_py_environment.TFPyEnvironment(test_py_env)
 
-fc_layer_params = (54, 16)
+fc_layer_params = (100, 50)
 action_tensor_spec = tensor_spec.from_spec(train_py_env.action_spec())
 num_actions = action_tensor_spec.maximum - action_tensor_spec.minimum + 1
 
@@ -81,7 +81,7 @@ num_actions = action_tensor_spec.maximum - action_tensor_spec.minimum + 1
 def dense_layer(num_units):
 	return tf.keras.layers.Dense(
 		num_units,
-		activation=tf.keras.activations.relu,
+		activation=tf.keras.activations.sigmoid,
 		kernel_initializer=tf.keras.initializers.VarianceScaling(
 			scale=2.0, mode='fan_in', distribution='truncated_normal'))
 
@@ -190,9 +190,10 @@ agent.train = common.function(agent.train)
 agent.train_step_counter.assign(0)
 
 # Evaluate the agent's policy once before training.
+train_avg_return = compute_avg_return(train_env, agent.policy, num_eval_episodes)
+train_returns = [train_avg_return]
 eval_avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
 eval_returns = [eval_avg_return]
-
 test_avg_return = compute_avg_return(test_env, agent.policy, num_eval_episodes)
 test_returns = [test_avg_return]
 
@@ -233,6 +234,9 @@ for _ in range(num_iterations):
 		print('step = {0}: loss = {1}'.format(step, train_loss))
 
 	if step % eval_interval == 0:
+		avg_return_train = compute_avg_return(train_env, agent.policy, num_eval_episodes)
+		print('step = {0}: Train Average Return = {1}'.format(step, avg_return_train))
+		train_returns.append(avg_return_train)
 		avg_return_eval = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
 		print('step = {0}: Eval Average Return = {1}'.format(step, avg_return_eval))
 		eval_returns.append(avg_return_eval)
@@ -242,10 +246,11 @@ for _ in range(num_iterations):
 		test_returns.append(avg_return_test)
 
 iterations = range(0, num_iterations + 1, eval_interval)
+# plt.plot(iterations, train_returns, color='orange')
 plt.plot(iterations, eval_returns, color='red')
 plt.plot(iterations, test_returns, color='#054E9F')
 plt.ylabel('Average Return')
 plt.xlabel('Iterations')
-plt.ylim(top=55000)
+plt.ylim()
 plt.savefig(os.path.join(full_policy_dir, 'result.jpg'))
 # plt.show()

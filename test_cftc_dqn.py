@@ -58,11 +58,13 @@ def compute_avg_return(environment, policy, policy_num, symbol, start_date):
     while not time_step.is_last():
         action_step = policy.action(time_step)
         time_step = environment.step(action_step.action)
-        print(environment.pyenv.envs[0].entry_date, action_step.action.numpy(), time_step.reward.numpy())
+        # print(environment.pyenv.envs[0].entry_date, action_step.action.numpy(), time_step.reward.numpy())
         episode_return += time_step.reward
         # 计算盈利百分比 货币对除以100000 黄金除以150000
         if symbol in ['EURUSD', 'GBPUSD', 'AUDUSD', 'USDCAD']:
             episode_return_list.append(int(episode_return.numpy())/100000)
+        elif symbol == 'USDJPY':
+            episode_return_list.append(int(episode_return.numpy()) / 1000)
         elif symbol in ['GOLD']:
             episode_return_list.append(int(episode_return.numpy()) / 150000)
         elif symbol in ['COCOA']:
@@ -98,7 +100,7 @@ def range_test(symbol, policy_num_min, policy_num_max):
                                 end_time=None)
         test_start_date = test_py_env.train_date[0:1].values[0]
         test_env = tf_py_environment.TFPyEnvironment(test_py_env)
-        for i in range(eval_interval*8,100000):
+        for i in range(eval_interval*20,100000):
             if i % eval_interval == 0:
                 policy_dir = os.path.join(policy_base_dir, f'{i}')
                 saved_policy = tf.compat.v2.saved_model.load(policy_dir)
@@ -134,17 +136,28 @@ def range_test(symbol, policy_num_min, policy_num_max):
 
 # 独立测试
 def single_test(symbol, policy_num, iter_num):
-    policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
+    policy_dir = os.path.join(os.getcwd(), 'product_cftc_data', str(policy_num), f'{iter_num}')
+    # policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
     saved_policy = tf.saved_model.load(policy_dir)
+    train_py_env = TradingEnv(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
+    train_start_date = train_py_env.train_date[0:1].values[0]
+    train_env = tf_py_environment.TFPyEnvironment(train_py_env)
     eval_py_env = TradingEnvVal(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week)
     eval_start_date = eval_py_env.train_date[0:1].values[0]
     eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
     test_py_env = TradingEnvTest(symbol=symbol, ob_shape=ob_shape, hold_week=hold_week, review_week=review_week, start_time=None, end_time=None)
     test_start_date = test_py_env.train_date[0:1].values[0]
     test_env = tf_py_environment.TFPyEnvironment(test_py_env)
+    train_avg_return, return_list_train, return_date_train = compute_avg_return(train_env, saved_policy, policy_num, symbol,
+                                                                             train_start_date)
     eval_avg_return, return_list_eval, return_date_eval = compute_avg_return(eval_env, saved_policy, policy_num, symbol, eval_start_date)
     test_avg_return, return_list_test, return_date_test = compute_avg_return(test_env, saved_policy, policy_num, symbol, test_start_date)
-    
+
+    df1 = pd.DataFrame()
+    df1['date'] = return_date_train
+    df1['profit'] = return_list_train
+    draw_polyline(df1, f'train', 'profit')
+
     df1 = pd.DataFrame()
     df1['date'] = return_date_eval
     df1['profit'] = return_list_eval
@@ -155,6 +168,7 @@ def single_test(symbol, policy_num, iter_num):
     df2['profit'] = return_list_test
     draw_polyline(df2, f'test', 'profit')
 
+    print('step = {0}: Average Return = {1}'.format(1, train_avg_return))
     print('step = {0}: Average Return = {1}'.format(1, eval_avg_return))
     print('step = {0}: Average Return = {1}'.format(1, test_avg_return))
 
@@ -162,6 +176,7 @@ def single_test(symbol, policy_num, iter_num):
 # 生产测试
 def product_test(symbol, policy_num, iter_num):
     policy_dir = os.path.join(os.getcwd(), 'dqn_policy', str(policy_num), f'{iter_num}')
+    # policy_dir = os.path.join(os.getcwd(), 'product_cftc_data', str(policy_num), f'{iter_num}')
     saved_policy = tf.saved_model.load(policy_dir)
 
     product_env_py = TradingEnvProduct(symbol, ob_shape=ob_shape, review_week=review_week)
@@ -207,16 +222,23 @@ def product(symbol, policy_num, iter_num):
     action_step = saved_policy.action(time_step)
     print(action_step.action.numpy())
 
-# range_test('EURUSD', 1, 6)
+# range_test('USDJPY', 17, 18)
 '''
-54 * 16
-best number now: 14 1000 17488.0 48659.0
-best number now: 31 1000 19276.0 31537.0
-
+USDJPY:
+best number now: 2 17200 22010.0 35361.0
+best number now: 4 77200 35762.0 38177.0
+best number now: 6 70000 23748.0 19953.0
+best number now: 7 8400 33384.0 22229.0
+best number now: 9 11200 35180.0 10427.0
+best number now: 11 12400 23614.0 27171.0
+best number now: 14 10000 37830.0 39475.0
+best number now: 15 17200 32010.0 7821.0
+best number now: 17 10000 31520.0 20237.0
 ob_shape=18
 54 * 16
 best number now: 2 91600 27424.0 33463.0
 '''
-# single_test('EURUSD', 2, 91600)
+# single_test('USDJPY', 4, 77200)
+single_test('EURUSD', 2, 91600)
 # product_test('EURUSD', 2, 91600)
-product('EURUSD', 2, 91600)
+# product('EURUSD', 2, 91600)

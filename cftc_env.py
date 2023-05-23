@@ -48,16 +48,16 @@ CFTC_NO_USE_COLUMNS = [
 
     'Change_in_Open_Interest_All',
 
-    # 'Change_in_Dealer_Long_All',
-    # 'Change_in_Dealer_Short_All',
+    'Change_in_Dealer_Long_All',
+    'Change_in_Dealer_Short_All',
     'Change_in_Dealer_Spread_All',
 
     # 'Change_in_Asset_Mgr_Long_All',
     # 'Change_in_Asset_Mgr_Short_All',
     'Change_in_Asset_Mgr_Spread_All',
 
-    # 'Change_in_Lev_Money_Long_All',
-    # 'Change_in_Lev_Money_Short_All',
+    'Change_in_Lev_Money_Long_All',
+    'Change_in_Lev_Money_Short_All',
     'Change_in_Lev_Money_Spread_All',
 
     'Change_in_Other_Rept_Long_All',

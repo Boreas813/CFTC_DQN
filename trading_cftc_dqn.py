@@ -28,7 +28,7 @@ from cftc_env import TradingEnv, TradingEnvVal, TradingEnvTest
 
 print(tf.version.VERSION)
 
-symbol = 'USDJPY'
+symbol = 'EURUSD'
 
 config_reader = configparser.ConfigParser()
 config_reader.read('config/config.ini', encoding='utf-8')
@@ -209,7 +209,7 @@ collect_driver = py_driver.PyDriver(
 	max_steps=collect_steps_per_iteration)
 
 base_policy_dir = 'dqn_policy'
-for i in range(1,100000):
+for i in range(1,num_iterations+1):
 	full_policy_dir = os.path.join(base_policy_dir, str(i))
 	if not os.path.exists(full_policy_dir):
 		os.makedirs(full_policy_dir)

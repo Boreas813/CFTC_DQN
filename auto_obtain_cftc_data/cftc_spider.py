@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import psycopg2
 
 config_reader = configparser.ConfigParser()
-config_reader.read('db.ini', encoding='utf-8')
+config_reader.read('../config/db.ini', encoding='utf-8')
 
 DATABASE = config_reader.get(section='postgres', option='database')
 USER = config_reader.get(section='postgres', option='user')

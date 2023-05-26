@@ -28,7 +28,7 @@ from cftc_env import TradingEnv, TradingEnvVal, TradingEnvTest
 
 print(tf.version.VERSION)
 
-symbol = 'EURUSD'
+symbol = 'SOYBEANS'
 
 config_reader = configparser.ConfigParser()
 config_reader.read('config/config.ini', encoding='utf-8')

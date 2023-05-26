@@ -575,7 +575,7 @@ class TradingEnvProduct(py_environment.PyEnvironment):
         return self._observation_spec
 
     def _reset(self):
-        self._state = self.train_data[0:3].reshape((self.ob_shape,))
+        self._state = self.train_data[0:self.review_week].reshape((self.ob_shape,))
         self._state = np.array(self._state, dtype=np.float64)
         self._episode_ended = False
         return ts.restart(self._state)

@@ -226,4 +226,4 @@ def product(symbol, policy_num, iter_num):
 # range_test('EURUSD', 1, 21)
 # single_test('EURUSD', 17, 45000)
 # product_test('EURUSD', 17, 45000)
-product('EURUSD', 2, 91600)
+product('EURUSD', 17, 45000)

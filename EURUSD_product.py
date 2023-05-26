@@ -20,7 +20,7 @@ symbol: EURUSD
 '''
 
 config_reader = configparser.ConfigParser()
-config_reader.read('../config/db.ini', encoding='utf-8')
+config_reader.read('config/db.ini', encoding='utf-8')
 DATABASE = config_reader.get(section='postgres', option='database')
 USER = config_reader.get(section='postgres', option='user')
 PASSWORD = config_reader.get(section='postgres', option='password')
@@ -78,11 +78,14 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             return ts.transition(
                 new_state, reward=reward, discount=0
             )
-
+# financial.australian_dollar financial.euro_fx
     def gen_state_data(self):
-        ret = fetch_recent_cftc_data('financial.euro_fx', 4).reverse()
+        ret = fetch_recent_cftc_data('financial.australian_dollar', 4)
+        ret.reverse()
         train_data = pd.DataFrame(ret)
         train_data = train_data.reset_index(drop=True)
+        columns_name = ['Change_in_Asset_Mgr_Long_All', 'Change_in_Asset_Mgr_Short_All']
+        train_data.columns = columns_name
 
         # 数据标准化
         with open(f'CFTC_{self.symbol}_2week_mean.pickle', 'rb') as f:

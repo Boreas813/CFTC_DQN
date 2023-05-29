@@ -20,7 +20,7 @@ symbol: EURUSD
 '''
 
 config_reader = configparser.ConfigParser()
-config_reader.read('../config/db.ini', encoding='utf-8')
+config_reader.read('config/db.ini', encoding='utf-8')
 DATABASE = config_reader.get(section='postgres', option='database')
 USER = config_reader.get(section='postgres', option='user')
 PASSWORD = config_reader.get(section='postgres', option='password')

@@ -151,7 +151,7 @@ CFTC_DISAGGREGATED_NO_USE_COLUMNS = [
     'Other_Rept_Positions_Long_Old',
     'Other_Rept_Positions_Short_Old',
     'Other_Rept_Positions_Spread_Old',
-    'Tot_Rept_Positions_Long_Old'
+    'Tot_Rept_Positions_Long_Old',
     'Tot_Rept_Positions_Short_Old',
     'NonRept_Positions_Long_Old',
     'NonRept_Positions_Short_Old',
@@ -235,7 +235,7 @@ CFTC_DISAGGREGATED_NO_USE_COLUMNS = [
     'Pct_of_OI_Tot_Rept_Short_Other',
     'Pct_of_OI_NonRept_Long_Other',
     'Pct_of_OI_NonRept_Short_Other',
-    'Traders_Tot_All,'
+    'Traders_Tot_All',
     'Traders_Prod_Merc_Long_All',
     'Traders_Prod_Merc_Short_All',
     'Traders_Swap_Long_All',
@@ -310,12 +310,6 @@ CFTC_NO_USE_COLUMNS = CFTC_DISAGGREGATED_NO_USE_COLUMNS
 
 
 class TradingEnv(py_environment.PyEnvironment):
-    '''
-    交易规则：
-        1.回顾四周CFTC数据，决定交易方向
-        2.持仓两周，之后离场
-    '''
-
     def __init__(self, symbol, ob_shape, hold_week, review_week):
         super().__init__()
         self.symbol = symbol

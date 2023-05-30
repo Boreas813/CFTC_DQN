@@ -88,9 +88,9 @@ class TradingEnvProduct(py_environment.PyEnvironment):
         train_data.columns = columns_name
 
         # 数据标准化
-        with open(f'CFTC_{self.symbol}_2week_mean.pickle', 'rb') as f:
+        with open(f'product_cftc_data/EURUSD/CFTC_{self.symbol}_1_4_mean.pickle', 'rb') as f:
             train_mean = pickle.load(f)
-        with open(f'CFTC_{self.symbol}_2week_std.pickle', 'rb') as f:
+        with open(f'product_cftc_data/EURUSD/CFTC_{self.symbol}_1_4_std.pickle', 'rb') as f:
             train_std = pickle.load(f)
         train_data = (train_data - train_mean) / train_std
 

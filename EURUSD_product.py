@@ -114,7 +114,7 @@ def fetch_recent_cftc_data(table_name, num_of_week):
 
 
 def product(symbol, policy_num, iter_num):
-    policy_dir = os.path.join(os.getcwd(), 'product_cftc_data', str(policy_num), f'{iter_num}')
+    policy_dir = os.path.join(os.getcwd(), 'product_cftc_data', 'EURUSD', str(policy_num), f'{iter_num}')
     saved_policy = tf.saved_model.load(policy_dir)
 
     product_env_py = TradingEnvProduct(symbol, ob_shape=8, review_week=4)

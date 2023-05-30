@@ -3,9 +3,9 @@ import configparser
 import pickle
 
 import psycopg2
-import tensorflow as tf
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 from tf_agents.environments import py_environment
 from tf_agents.environments import tf_py_environment
 from tf_agents.specs import array_spec
@@ -80,7 +80,7 @@ class TradingEnvProduct(py_environment.PyEnvironment):
             )
 # financial.australian_dollar financial.euro_fx
     def gen_state_data(self):
-        ret = fetch_recent_cftc_data('financial.australian_dollar', 4)
+        ret = fetch_recent_cftc_data('financial.euro_fx', 4)
         ret.reverse()
         train_data = pd.DataFrame(ret)
         train_data = train_data.reset_index(drop=True)

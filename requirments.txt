@@ -4,4 +4,8 @@ matplotlib
 # apt-get install python3-tk
 chart-studio
 xlrd
-psycopg2
+requests
+html5lib
+beautifulsoup4
+psycopg2-binary
+apscheduler

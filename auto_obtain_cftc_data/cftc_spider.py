@@ -2,10 +2,12 @@ import re
 import calendar
 import datetime
 import configparser
+import time
 
 import requests
 from bs4 import BeautifulSoup
 import psycopg2
+from apscheduler.schedulers.background import BackgroundScheduler
 
 config_reader = configparser.ConfigParser()
 config_reader.read('../config/db.ini', encoding='utf-8')
@@ -209,4 +211,17 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    global_scheduler = BackgroundScheduler()
+    standard_scheduler_dict = {
+        main: {'type': 'cron', 'time_pattern': (8, 0, 1)},
+    }
+    schedulers = [global_scheduler.add_job(func, 'cron', hour=standard_scheduler_dict[func]['time_pattern'][0],
+                                           minute=standard_scheduler_dict[func]['time_pattern'][1],
+                                           second=standard_scheduler_dict[func]['time_pattern'][2])
+                  if standard_scheduler_dict[func]['type'] == 'cron'
+                  else global_scheduler.add_job(func, 'interval',
+                                                minutes=standard_scheduler_dict[func]['time_pattern'])
+                  for func in standard_scheduler_dict.keys()]
+    global_scheduler.start()
+    while True:
+        time.sleep(60)

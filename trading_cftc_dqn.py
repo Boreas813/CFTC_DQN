@@ -28,12 +28,10 @@ from cftc_env import TradingEnv, TradingEnvVal, TradingEnvTest
 
 print(tf.version.VERSION)
 
-symbol = 'SOYBEANS'
-
 config_reader = configparser.ConfigParser()
 config_reader.read('config/config.ini', encoding='utf-8')
 
-
+symbol = config_reader['CFTC']['symbol']
 num_iterations = config_reader.getint(section='CFTC', option='num_iterations')
 initial_collect_steps = config_reader.getint(section='CFTC', option='initial_collect_steps')
 collect_steps_per_iteration = config_reader.getint(section='CFTC', option='collect_steps_per_iteration')

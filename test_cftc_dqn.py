@@ -125,7 +125,7 @@ def range_test(symbol, policy_num_min, policy_num_max):
                 # print('step = {0}: Erain Average Return = {1}'.format(1, avg_return_train))
                 # print('step = {0}: Eval Average Return = {1}'.format(1, avg_return_eval))
                 # print('step = {0}: Test Average Return = {1}'.format(1, avg_return_test))
-                if avg_return_eval + avg_return_test >= best_eval + best_test:
+                if avg_return_eval + avg_return_test >= best_eval + best_test and avg_return_eval>0 and avg_return_test>0:
                     best_train = avg_return_train
                     best_test = avg_return_test
                     best_eval = avg_return_eval
@@ -223,7 +223,7 @@ def product(symbol, policy_num, iter_num):
     print(action_step.action.numpy())
 
 
-# range_test('EURUSD', 1, 21)
-# single_test('EURUSD', 17, 45000)
+# range_test('SOYBEANS', 1, 22)
+single_test('SOYBEANS', 2, 46000)
 # product_test('EURUSD', 17, 45000)
-product('EURUSD', 17, 45000)
+# product('EURUSD', 17, 45000)
